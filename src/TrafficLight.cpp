@@ -19,6 +19,7 @@ T MessageQueue<T>::receive()
             msg = std::move(*this->_messageQueue.front());
             *this->_messageQueue.pop_front();
         });
+    lck.unlock();
 
 }
 
