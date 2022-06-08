@@ -80,7 +80,7 @@ void TrafficLight::cycleThroughPhases()
     std::cout << "DEBUG: intital random seconds" << randomSeconds << '\n';
     while(breakFlag == 0 ){
         if(now > stopTime){
-            // do the work of changing the phase
+
             if(this->getCurrentPhase() == TrafficLightPhase::red ){
                 this->_currentPhase = TrafficLightPhase::green;
             }
