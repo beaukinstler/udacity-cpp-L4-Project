@@ -3,6 +3,7 @@
 #include "Street.h"
 #include "Intersection.h"
 #include "Vehicle.h"
+#include "TrafficObject.h"
 
 Vehicle::Vehicle()
 {
