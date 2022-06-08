@@ -43,9 +43,19 @@ TrafficLightPhase TrafficLight::getCurrentPhase()
     return _currentPhase;
 }
 
+void worker(){
+    std::cout << "test\n";
+}
+
 void TrafficLight::simulate()
 {
+
     // FP.2b : Finally, the private method „cycleThroughPhases“ should be started in a thread when the public method „simulate“ is called. To do this, use the thread queue in the base class. 
+    // note: https://stackoverflow.com/questions/50175002/invalid-use-of-non-static-member-function-c-thread-linux
+    // member functions 
+    // In C++ member functions have an implicit first parameter that binds to this. When creating a thread, the this pointer must be passed. 
+    // and you must You must also qualify the member function with a class name. 
+    this->threads.emplace_back(std::thread(&TrafficLight::cycleThroughPhases, this));
 }
 
 // virtual function which is executed in a thread
