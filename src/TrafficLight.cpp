@@ -77,13 +77,11 @@ void TrafficLight::cycleThroughPhases()
                 this->_currentPhase = TrafficLightPhase::red;
 
             }
-            this->_trafficLightPhases.send(std::move(this->_currentPhase));
 
             // reset the clock
             randomSeconds = distrib(randomTime);
             std::cout << "DEBUG: random seconds reset to" << randomSeconds << '\n';
             stopTime = now + std::chrono::duration<int>(randomSeconds);
-
         }
         now = std::chrono::system_clock::now();
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
