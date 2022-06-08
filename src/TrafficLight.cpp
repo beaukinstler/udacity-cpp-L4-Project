@@ -15,11 +15,13 @@ T MessageQueue<T>::receive()
     // The received object should then be returned by the receive function. 
     std::unique_lock lck(this->_mqMutex);
     T msg;
-    this->_msgQuConVar.wait(lck, [&msg, this ](){
-            msg = std::move(*this->_messageQueue.front());
-            *this->_messageQueue.pop_front();
+    this->_msgQuConVar.wait(lck, [&, msg ]() mutable {
+            msg = std::move(this->_queue.front());
+            this->_queue.pop_front();
+            return true;
         });
     lck.unlock();
+    return msg;
 
 }
 
@@ -49,6 +51,10 @@ void TrafficLight::waitForGreen()
     // FP.5b : add the implementation of the method waitForGreen, in which an infinite while-loop 
     // runs and repeatedly calls the receive function on the message queue. 
     // Once it receives TrafficLightPhase::green, the method returns.
+    TrafficLightPhase tp = TrafficLight::_messageQueue.receive();
+    while( tp != TrafficLightPhase::green ) {
+        std::cout << "debug: Traffic is no green\n";
+    }
 }
 
 TrafficLightPhase TrafficLight::getCurrentPhase()
