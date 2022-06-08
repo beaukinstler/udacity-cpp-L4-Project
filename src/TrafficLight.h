@@ -20,8 +20,8 @@ class MessageQueue
 {
 public:
     
-    MessageQueue();
-    ~MessageQueue();
+    MessageQueue(){};
+    ~MessageQueue(){};
 
     void send( T&& );
     T receive();
@@ -71,6 +71,7 @@ private:
     std::condition_variable _condition;
     std::mutex _mutex;
     TrafficLightPhase _currentPhase;
+    MessageQueue<TrafficLightPhase> _messageQueue;
 };
 
 #endif
