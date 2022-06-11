@@ -13,12 +13,20 @@ T MessageQueue<T>::receive()
     // FP.5a : The method receive should use std::unique_lock<std::mutex> and _condition.wait() 
     // to wait for and receive new messages and pull them from the queue using move semantics. 
     // The received object should then be returned by the receive function. 
-    std::unique_lock lck(this->_mqMutex);
+    std::unique_lock lck(_mqMutex);
     T msg;
-    this->_msgQuConVar.wait(lck, [&, msg ]() mutable {
-            msg = std::move(this->_queue.front());
-            this->_queue.pop_front();
-            return true;
+    _msgQuConVar.wait(lck, [this, &msg ]() mutable {
+            // msg = std::move(this->_queue.front());
+            msg = std::move(_queue.front());
+            // _queue.pop_front();
+            _queue.pop();
+            if(msg == TrafficLightPhase::green || msg == TrafficLightPhase::red){
+              return true;  
+            }
+            else{
+                return false;
+            }
+            
         });
     lck.unlock();
     return msg;
@@ -31,9 +39,9 @@ void MessageQueue<T>::send(T &&msg)
     // FP.4a : The method send should use the mechanisms std::lock_guard<std::mutex> 
     // as well as _condition.notify_one() to add a new message to the queue and afterwards send a notification.
     std::lock_guard(this->_mqMutex);
-    MessageQueue::_queue.emplace_back(msg);
+    MessageQueue::_queue.emplace(std::move(msg));
 
-    this->_msgQuConVar.notify_one();
+    MessageQueue::_msgQuConVar.notify_one();
 
 }
 
@@ -51,10 +59,24 @@ void TrafficLight::waitForGreen()
     // FP.5b : add the implementation of the method waitForGreen, in which an infinite while-loop 
     // runs and repeatedly calls the receive function on the message queue. 
     // Once it receives TrafficLightPhase::green, the method returns.
-
-    while( TrafficLight::_messageQueue.receive() != TrafficLightPhase::green ) {
     
+    TrafficLightPhase p = TrafficLight::_messageQueue.receive();
+    if(p == TrafficLightPhase::green){
+        std::cout << TrafficLightPhase::green << "\n";
+    }
+    if(p == TrafficLightPhase::red){
+        std::cout << TrafficLightPhase::red << "\n";
+    }
+
+    std::cout << "GREEN: " << TrafficLightPhase::green << "\n";
+    std::cout << "RED: " << TrafficLightPhase::red << "\n";
+    std::cout << "p: " << p << "\n";
+
+    while( p != TrafficLightPhase::green ) {
+        
         std::cout << "debug: Traffic is red\n";
+        p = TrafficLight::_messageQueue.receive();
+        std::cout << "p: " << p << "\n";
     }
     std::cout << "debug: Traffic is green\n";
 }
@@ -101,19 +123,23 @@ void TrafficLight::cycleThroughPhases()
     std::cout << "DEBUG: intital random seconds" << randomSeconds << '\n';
     while(breakFlag == 0 ){
         if(now > stopTime){
+            std::lock_guard<std::mutex> lock( this->_mutex );
             TrafficLightPhase p = this->getCurrentPhase();
             if(p == TrafficLightPhase::red ){
                 std::cout << "Toggle TrafficLightPhase from red to green"<< '\n';
-                this->_messageQueue.send(std::move(p));
+                p = TrafficLightPhase::green;
+
                 // this->_currentPhase = TrafficLightPhase::green;
 
             }
             else{
                 std::cout << "Toggle TrafficLightPhase from GREEN to RED"<< '\n';
+                p = TrafficLightPhase::red;
                 // this->_currentPhase = TrafficLightPhase::red;
-                // this->_messageQueue.send()
-
             }
+
+            // send it back
+            this->_messageQueue.send(std::move(p));
 
             // reset the clock
             randomSeconds = distrib(randomTime);
