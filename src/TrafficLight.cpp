@@ -54,8 +54,9 @@ void TrafficLight::waitForGreen()
 
     while( TrafficLight::_messageQueue.receive() != TrafficLightPhase::green ) {
     
-        std::cout << "debug: Traffic is no green\n";
+        std::cout << "debug: Traffic is red\n";
     }
+    std::cout << "debug: Traffic is green\n";
 }
 
 TrafficLightPhase TrafficLight::getCurrentPhase()
@@ -100,12 +101,17 @@ void TrafficLight::cycleThroughPhases()
     std::cout << "DEBUG: intital random seconds" << randomSeconds << '\n';
     while(breakFlag == 0 ){
         if(now > stopTime){
+            TrafficLightPhase p = this->getCurrentPhase();
+            if(p == TrafficLightPhase::red ){
+            std::cout << "Toggle TrafficLightPhase from red to green"<< '\n';
 
-            if(this->getCurrentPhase() == TrafficLightPhase::red ){
-                this->_currentPhase = TrafficLightPhase::green;
+                // this->_currentPhase = TrafficLightPhase::green;
+
             }
             else{
-                this->_currentPhase = TrafficLightPhase::red;
+            std::cout << "Toggle TrafficLightPhase from GREEN to RED"<< '\n';
+                // this->_currentPhase = TrafficLightPhase::red;
+                // this->_messageQueue.send()
 
             }
 
