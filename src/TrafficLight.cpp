@@ -103,13 +103,13 @@ void TrafficLight::cycleThroughPhases()
         if(now > stopTime){
             TrafficLightPhase p = this->getCurrentPhase();
             if(p == TrafficLightPhase::red ){
-            std::cout << "Toggle TrafficLightPhase from red to green"<< '\n';
+                std::cout << "Toggle TrafficLightPhase from red to green"<< '\n';
 
                 // this->_currentPhase = TrafficLightPhase::green;
 
             }
             else{
-            std::cout << "Toggle TrafficLightPhase from GREEN to RED"<< '\n';
+                std::cout << "Toggle TrafficLightPhase from GREEN to RED"<< '\n';
                 // this->_currentPhase = TrafficLightPhase::red;
                 // this->_messageQueue.send()
 
