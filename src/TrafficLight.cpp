@@ -98,8 +98,6 @@ void TrafficLight::cycleThroughPhases()
     std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
     std::chrono::time_point<std::chrono::system_clock> stopTime = now + std::chrono::duration<int>(randomSeconds);
 
-    // sleep at every iteration to reduce CPU usage
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
     while (true)
     {
         if (now > stopTime)
@@ -129,6 +127,7 @@ void TrafficLight::cycleThroughPhases()
         {
             now = std::chrono::system_clock::now();
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        // sleep at every iteration to reduce CPU usage
+        std::this_thread::sleep_for(std::chrono::milliseconds(40));
     }
 }
