@@ -48,8 +48,11 @@ void TrafficLight::waitForGreen()
     // runs and repeatedly calls the receive function on the message queue.
     // Once it receives TrafficLightPhase::green, the method returns.
 
-    while( true ) {
-        if(TrafficLightPhase::green == _messageQueue.receive()){
+    while (true)
+    {
+
+        if (TrafficLightPhase::green == this->getCurrentPhase())
+        {
             return;
         }
     }
@@ -107,10 +110,10 @@ void TrafficLight::cycleThroughPhases()
             std::cout << "Now is greater than the stopTime\n";
             std::lock_guard<std::mutex> lock(_mutex);
 
-            if(this->getCurrentPhase() == TrafficLightPhase::red ){
-                std::cout << "Toggle TrafficLightPhase from red to green"<< '\n';
+            if (_currentPhase == TrafficLightPhase::red)
+            {
+                std::cout << "Toggle TrafficLightPhase from red to green" << '\n';
                 _currentPhase = TrafficLightPhase::green;
-
             }
             else
             {
@@ -121,7 +124,8 @@ void TrafficLight::cycleThroughPhases()
             }
 
             // send it back
-            this->_messageQueue.send(std::move(_currentPhase));
+            _messageQueue.send(std::move(_currentPhase));
+            _currentPhase = _messageQueue.receive();
 
             // reset the clock
             randomSeconds = distrib(randomTime);
