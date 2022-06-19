@@ -151,7 +151,8 @@ bool Intersection::trafficLightIsGreen()
        return true;
    else
        return false;
+
    
 
-  return true; // makes traffic light permanently green
+//   return true; // makes traffic light permanently green
 } 
