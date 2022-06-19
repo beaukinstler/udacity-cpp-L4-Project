@@ -100,13 +100,10 @@ void TrafficLight::cycleThroughPhases()
 
     // sleep at every iteration to reduce CPU usage
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-    std::cout << "DEBUG: intital random seconds" << randomSeconds << '\n';
     while (true)
     {
         if (now > stopTime)
         {
-            std::cout << "Now is greater than the stopTime\n";
             std::lock_guard<std::mutex> lock(_mutex);
 
             if (this->getCurrentPhase() == TrafficLightPhase::red)
@@ -125,7 +122,6 @@ void TrafficLight::cycleThroughPhases()
 
             // reset the clock
             randomSeconds = distrib(randomTime);
-            std::cout << "DEBUG: random seconds reset to" << randomSeconds << '\n';
             now = std::chrono::system_clock::now();
             stopTime = now + std::chrono::duration<int>(randomSeconds);
         }
