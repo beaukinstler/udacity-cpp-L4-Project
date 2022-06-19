@@ -2,7 +2,7 @@
 #define TRAFFICLIGHT_H
 
 #include <mutex>
-#include <queue>
+#include <deque>
 #include <condition_variable>
 #include "TrafficObject.h"
 
@@ -27,7 +27,7 @@ public:
     T receive();
 
 private:
-    std::queue<T> _queue;
+    std::deque<T> _queue;
     std::condition_variable _msgQuConVar;
     std::mutex _mqMutex;
 

@@ -18,9 +18,7 @@ T MessageQueue<T>::receive()
     _msgQuConVar.wait(lck, [this, &msg ]() mutable {
             // msg = std::move(this->_queue.front());
             msg = std::move(_queue.front());
-            // _queue.pop_front();
-            _queue.pop();
-            if(msg == TrafficLightPhase::green || msg == TrafficLightPhase::red){
+            _queue.pop_front();
               return true;  
             }
             else{
@@ -39,7 +37,7 @@ void MessageQueue<T>::send(T &&msg)
     // FP.4a : The method send should use the mechanisms std::lock_guard<std::mutex> 
     // as well as _condition.notify_one() to add a new message to the queue and afterwards send a notification.
     std::lock_guard(this->_mqMutex);
-    _queue.emplace(std::move(msg));
+    _queue.emplace_back(std::move(msg));
 
     _msgQuConVar.notify_one();
 
