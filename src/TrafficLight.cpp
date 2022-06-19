@@ -30,6 +30,7 @@ void MessageQueue<T>::send(T &&msg)
     // FP.4a : The method send should use the mechanisms std::lock_guard<std::mutex>
     // as well as _condition.notify_one() to add a new message to the queue and afterwards send a notification.
     std::lock_guard(this->_mqMutex);
+    _queue.clear();
     _queue.emplace_back(std::move(msg));
 
     _msgQuConVar.notify_one();
@@ -50,8 +51,7 @@ void TrafficLight::waitForGreen()
 
     while (true)
     {
-
-        if (TrafficLightPhase::green == this->getCurrentPhase())
+        if (TrafficLightPhase::green == _messageQueue.receive())
         {
             return;
         }
@@ -104,28 +104,24 @@ void TrafficLight::cycleThroughPhases()
     std::cout << "DEBUG: intital random seconds" << randomSeconds << '\n';
     while (true)
     {
-
         if (now > stopTime)
         {
             std::cout << "Now is greater than the stopTime\n";
             std::lock_guard<std::mutex> lock(_mutex);
 
-            if (_currentPhase == TrafficLightPhase::red)
+            if (this->getCurrentPhase() == TrafficLightPhase::red)
             {
-                std::cout << "Toggle TrafficLightPhase from red to green" << '\n';
+
                 _currentPhase = TrafficLightPhase::green;
             }
             else
             {
-                std::cout << "Now not greater than the stopTime\n";
-                std::cout << "Toggle TrafficLightPhase from GREEN to RED" << '\n';
-
                 _currentPhase = TrafficLightPhase::red;
             }
 
             // send it back
-            _messageQueue.send(std::move(_currentPhase));
-            _currentPhase = _messageQueue.receive();
+
+            this->_messageQueue.send(std::move(_currentPhase));
 
             // reset the clock
             randomSeconds = distrib(randomTime);
