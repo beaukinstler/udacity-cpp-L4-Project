@@ -16,17 +16,14 @@ T MessageQueue<T>::receive()
     std::unique_lock lck(_mqMutex);
     T msg;
     _msgQuConVar.wait(lck, [this, &msg ]() mutable {
-            // msg = std::move(this->_queue.front());
+            if(_queue.empty()) return false;
             msg = std::move(_queue.front());
             _queue.pop_front();
-              return true;  
-            }
-            else{
-                return false;
-            }
+            return true;
+           
             
         });
-    lck.unlock();
+
     return msg;
 
 }
@@ -58,25 +55,13 @@ void TrafficLight::waitForGreen()
     // runs and repeatedly calls the receive function on the message queue. 
     // Once it receives TrafficLightPhase::green, the method returns.
     
-    TrafficLightPhase p = TrafficLight::_messageQueue.receive();
-    if(p == TrafficLightPhase::green){
-        std::cout << TrafficLightPhase::green << "\n";
-    }
-    if(p == TrafficLightPhase::red){
-        std::cout << TrafficLightPhase::red << "\n";
-    }
+   
 
-    std::cout << "GREEN: " << TrafficLightPhase::green << "\n";
-    std::cout << "RED: " << TrafficLightPhase::red << "\n";
-    std::cout << "p: " << p << "\n";
-
-    while( p != TrafficLightPhase::green ) {
-        
-        std::cout << "debug: Traffic is red\n";
-        p = TrafficLight::_messageQueue.receive();
-        std::cout << "p: " << p << "\n";
+    while( true ) {
+        if(TrafficLightPhase::green == _messageQueue.receive()){
+            return;
+        }
     }
-    std::cout << "debug: Traffic is green\n";
 }
 
 TrafficLightPhase TrafficLight::getCurrentPhase()
@@ -118,33 +103,40 @@ void TrafficLight::cycleThroughPhases()
     std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
     std::chrono::time_point<std::chrono::system_clock> stopTime = now + std::chrono::duration<int>(randomSeconds);
 
-    std::cout << "DEBUG: intital random seconds" << randomSeconds << '\n';
-    while(breakFlag == 0 ){
-        if(now > stopTime){
-            std::lock_guard<std::mutex> lock( this->_mutex );
-            TrafficLightPhase p = this->getCurrentPhase();
-            if(p == TrafficLightPhase::red ){
-                std::cout << "Toggle TrafficLightPhase from red to green"<< '\n';
-                p = TrafficLightPhase::green;
+    // sleep at every iteration to reduce CPU usage
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-                // this->_currentPhase = TrafficLightPhase::green;
+    std::cout << "DEBUG: intital random seconds" << randomSeconds << '\n';
+    while(true){
+        if(now > stopTime){
+            std::cout << "Now is greater than the stopTime\n";
+            std::lock_guard<std::mutex> lock( _mutex );
+
+            if(this->getCurrentPhase() == TrafficLightPhase::red ){
+                std::cout << "Toggle TrafficLightPhase from red to green"<< '\n';
+                _currentPhase = TrafficLightPhase::green;
 
             }
-            else{
+            else{            
+                std::cout << "Now not greater than the stopTime\n";
                 std::cout << "Toggle TrafficLightPhase from GREEN to RED"<< '\n';
-                p = TrafficLightPhase::red;
-                // this->_currentPhase = TrafficLightPhase::red;
+
+                _currentPhase = TrafficLightPhase::red;
             }
 
             // send it back
-            this->_messageQueue.send(std::move(p));
+            this->_messageQueue.send(std::move(_currentPhase));
 
             // reset the clock
             randomSeconds = distrib(randomTime);
             std::cout << "DEBUG: random seconds reset to" << randomSeconds << '\n';
+            now = std::chrono::system_clock::now();
             stopTime = now + std::chrono::duration<int>(randomSeconds);
+
         }
-        now = std::chrono::system_clock::now();
+        else{
+            now = std::chrono::system_clock::now();
+        }
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
