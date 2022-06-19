@@ -3,14 +3,21 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "/home/beau/Documents/coding/CppND-Program-a-Concurrent-Traffic-Simulation/src",
+                "/usr/local/include/opencv4/**",
+                "/usr/local/include/opencv4/opencv2/**",
+                "/usr/local/include/opencv4/opencv2"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/g++",
             "cStandard": "c17",
             "cppStandard": "c++20",
             "intelliSenseMode": "linux-clang-x64",
-            "configurationProvider": "ms-vscode.makefile-tools"
+            "configurationProvider": "ms-vscode.makefile-tools",
+            "compilerArgs": [
+                "-pthread"
+            ]
         }
     ],
     "version": 4

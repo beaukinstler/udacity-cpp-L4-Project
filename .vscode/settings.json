@@ -51,6 +51,9 @@
         "tuple": "cpp",
         "typeinfo": "cpp",
         "utility": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "complex": "cpp",
+        "cstddef": "cpp",
+        "sstream": "cpp"
     }
 }
